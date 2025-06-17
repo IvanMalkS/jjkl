@@ -35,7 +35,7 @@ docker compose down 2>/dev/null || true
 read -p "🗑️  Remove existing database data? (y/N): " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
-    docker volume rm jjkl_postgres_data 2>/dev/null || true
+    docker volume rm $(docker compose config --volumes) 2>/dev/null || true
     echo "🗑️  Database volume removed"
 fi
 

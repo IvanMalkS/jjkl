@@ -15,9 +15,10 @@ COPY tailwind.config.ts ./
 COPY postcss.config.js ./
 COPY tsconfig.json ./
 COPY components.json ./
+COPY build.sh ./
 
-# Build the client
-RUN npm run build
+# Build the client with custom script
+RUN chmod +x build.sh && ./build.sh
 
 # Production stage
 FROM nginx:alpine

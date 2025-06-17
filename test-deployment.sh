@@ -17,7 +17,7 @@ fi
 
 # Test PostgreSQL connectivity
 echo "🗄️  Testing PostgreSQL database..."
-if docker-compose exec -T postgres pg_isready -U deeplom_user -d deeplom > /dev/null 2>&1; then
+if docker compose exec -T postgres pg_isready -U deeplom_user -d deeplom > /dev/null 2>&1; then
     echo "✅ PostgreSQL database is accessible"
 else
     echo "❌ PostgreSQL database is not accessible"
@@ -63,7 +63,7 @@ fi
 
 # Test database tables exist
 echo "🗂️  Testing database schema..."
-TABLE_COUNT=$(docker-compose exec -T postgres psql -U deeplom_user -d deeplom -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" 2>/dev/null | tr -d ' ')
+TABLE_COUNT=$(docker compose exec -T postgres psql -U deeplom_user -d deeplom -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" 2>/dev/null | tr -d ' ')
 
 if [ "$TABLE_COUNT" -ge 3 ]; then
     echo "✅ Database tables created successfully ($TABLE_COUNT tables)"
@@ -80,6 +80,6 @@ echo "   Backend:  http://localhost:5000"
 echo "   Database: localhost:5432"
 echo ""
 echo "🔍 Management commands:"
-echo "   View logs:     docker-compose logs -f [service]"
-echo "   Database CLI:  docker-compose exec postgres psql -U deeplom_user -d deeplom"
-echo "   Restart:       docker-compose restart [service]"
+echo "   View logs:     docker compose logs -f [service]"
+echo "   Database CLI:  docker compose exec postgres psql -U deeplom_user -d deeplom"
+echo "   Restart:       docker compose restart [service]"
