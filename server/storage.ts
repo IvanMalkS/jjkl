@@ -126,7 +126,12 @@ export class MemStorage implements IStorage {
   async createWorkOrder(order: InsertWorkOrder & { userId: number; price: number }): Promise<WorkOrder> {
     const workOrder: WorkOrder = {
       id: this.currentWorkOrderId++,
-      ...order,
+      type: order.type,
+      theme: order.theme,
+      customOutline: order.customOutline ?? false,
+      outline: order.outline || null,
+      userId: order.userId,
+      price: order.price,
       status: 'pending',
       createdAt: new Date(),
       completedAt: null
