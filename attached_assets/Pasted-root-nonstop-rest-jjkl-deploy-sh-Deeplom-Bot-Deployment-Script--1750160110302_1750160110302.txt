@@ -1,0 +1,174 @@
+root@nonstop-rest:~/jjkl# ./deploy.sh
+🚀 Deeplom Bot Deployment Script
+================================
+🔐 Generated JWT secret
+🔐 Using default PostgreSQL password
+🛑 Stopping existing containers...
+🗑️  Remove existing database data? (y/N): y
+🗑️  Database volume removed
+🏗️  Building Docker containers...
+📦 Building backend container...
+WARN[0000] /root/jjkl/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion
+Compose can now delegate builds to bake for better performance.
+ To do so, set COMPOSE_BAKE=true.
+[+] Building 37.5s (18/18) FINISHED                                                                      docker:default
+ => [backend internal] load build definition from Dockerfile.server                                                0.1s
+ => => transferring dockerfile: 606B                                                                               0.0s
+ => [backend internal] load metadata for docker.io/library/node:20-alpine                                          0.9s
+ => [backend internal] load .dockerignore                                                                          0.1s
+ => => transferring context: 159B                                                                                  0.0s
+ => [backend  1/12] FROM docker.io/library/node:20-alpine@sha256:d3507a213936fe4ef54760a186e113db5188472d9efdf491  0.0s
+ => [backend internal] load build context                                                                          0.1s
+ => => transferring context: 356.39kB                                                                              0.0s
+ => CACHED [backend  2/12] WORKDIR /app                                                                            0.0s
+ => [backend  3/12] COPY package*.json ./                                                                          0.2s
+ => [backend  4/12] COPY drizzle.config.ts ./                                                                      0.1s
+ => [backend  5/12] RUN npm ci --only=production                                                                  23.1s
+ => [backend  6/12] RUN npm install -g tsx drizzle-kit                                                             6.8s
+ => [backend  7/12] RUN apk add --no-cache postgresql-client                                                       1.7s
+ => [backend  8/12] COPY server/ ./server/                                                                         0.2s
+ => [backend  9/12] COPY shared/ ./shared/                                                                         0.1s
+ => [backend 10/12] COPY tsconfig.json ./                                                                          0.1s
+ => [backend 11/12] COPY docker-entrypoint.sh ./                                                                   0.1s
+ => [backend 12/12] RUN chmod +x docker-entrypoint.sh                                                              0.3s
+ => [backend] exporting to image                                                                                   3.4s
+ => => exporting layers                                                                                            3.3s
+ => => writing image sha256:674182fc2b038812666f4b571d7de5aeaa65c9bd6c24ec57ce0de737b371b1d8                       0.0s
+ => => naming to docker.io/library/jjkl-backend                                                                    0.0s
+ => [backend] resolving provenance for metadata file                                                               0.0s
+[+] Building 1/1
+ ✔ backend  Built                                                                                                  0.0s
+📦 Building frontend container...
+WARN[0000] /root/jjkl/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion
+Compose can now delegate builds to bake for better performance.
+ To do so, set COMPOSE_BAKE=true.
+[+] Building 41.1s (18/20)                                                                               docker:default
+ => [frontend internal] load build definition from Dockerfile.client                                               0.0s
+ => => transferring dockerfile: 618B                                                                               0.0s
+ => [frontend internal] load metadata for docker.io/library/nginx:alpine                                           0.0s
+ => [frontend internal] load metadata for docker.io/library/node:20-alpine                                         0.4s
+ => [frontend internal] load .dockerignore                                                                         0.0s
+ => => transferring context: 159B                                                                                  0.0s
+ => [frontend builder  1/12] FROM docker.io/library/node:20-alpine@sha256:d3507a213936fe4ef54760a186e113db5188472  0.0s
+ => [frontend internal] load build context                                                                         0.1s
+ => => transferring context: 210.01kB                                                                              0.0s
+ => [frontend stage-1 1/3] FROM docker.io/library/nginx:alpine                                                     0.4s
+ => CACHED [frontend builder  2/12] WORKDIR /app                                                                   0.0s
+ => CACHED [frontend builder  3/12] COPY package*.json ./                                                          0.0s
+ => [frontend builder  4/12] RUN npm ci                                                                           27.3s
+ => [frontend builder  5/12] COPY client/ ./client/                                                                0.1s
+ => [frontend builder  6/12] COPY shared/ ./shared/                                                                0.1s
+ => [frontend builder  7/12] COPY vite.config.ts ./                                                                0.1s
+ => [frontend builder  8/12] COPY tailwind.config.ts ./                                                            0.1s
+ => [frontend builder  9/12] COPY postcss.config.js ./                                                             0.1s
+ => [frontend builder 10/12] COPY tsconfig.json ./                                                                 0.1s
+ => [frontend builder 11/12] COPY components.json ./                                                               0.1s
+ => ERROR [frontend builder 12/12] RUN npm run build                                                              12.1s
+------
+ > [frontend builder 12/12] RUN npm run build:
+0.558
+0.558 > rest-express@1.0.0 build
+0.558 > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+0.558
+0.925 vite v5.4.14 building for production...
+1.003 transforming...
+1.630 Browserslist: browsers data (caniuse-lite) is 8 months old. Please run:
+1.630   npx update-browserslist-db@latest
+1.630   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+11.31 ✓ 1727 modules transformed.
+11.81 rendering chunks...
+11.82 computing gzip size...
+11.84 ../dist/public/index.html                   0.63 kB │ gzip:   0.38 kB
+11.84 ../dist/public/assets/index-BpyfWkhI.css   61.21 kB │ gzip:  10.92 kB
+11.84 ../dist/public/assets/index-_LN41dEA.js   363.21 kB │ gzip: 114.34 kB
+11.84 ✓ built in 10.88s
+11.91 ✘ [ERROR] The entry point "server/index.ts" cannot be marked as external
+11.91
+11.91 1 error
+------
+failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+🗄️  Starting PostgreSQL database...
+WARN[0000] /root/jjkl/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion
+[+] Running 3/3
+ ✔ Network jjkl_deeplom-network  Created                                                                           0.1s
+ ✔ Volume "jjkl_postgres_data"   Created                                                                           0.0s
+ ✔ Container deeplom-postgres    Started                                                                           0.4s
+⏳ Waiting for PostgreSQL to be ready...
+   ... waiting (2/60 seconds)
+✅ PostgreSQL is ready!
+🔧 Starting backend service...
+WARN[0000] /root/jjkl/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion
+[+] Running 2/2
+ ✔ Container deeplom-postgres  Healthy                                                                             7.7s
+ ✔ Container deeplom-backend   Started                                                                             8.0s
+⏳ Waiting for backend to be ready...
+🌐 Starting frontend service...
+WARN[0000] /root/jjkl/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion
+Compose can now delegate builds to bake for better performance.
+ To do so, set COMPOSE_BAKE=true.
+[+] Building 12.8s (18/20)                                                                               docker:default
+ => [frontend internal] load build definition from Dockerfile.client                                               0.0s
+ => => transferring dockerfile: 618B                                                                               0.0s
+ => [frontend internal] load metadata for docker.io/library/nginx:alpine                                           0.0s
+ => [frontend internal] load metadata for docker.io/library/node:20-alpine                                         0.5s
+ => [frontend internal] load .dockerignore                                                                         0.0s
+ => => transferring context: 159B                                                                                  0.0s
+ => [frontend builder  1/12] FROM docker.io/library/node:20-alpine@sha256:d3507a213936fe4ef54760a186e113db5188472  0.0s
+ => [frontend internal] load build context                                                                         0.0s
+ => => transferring context: 4.20kB                                                                                0.0s
+ => CACHED [frontend stage-1 1/3] FROM docker.io/library/nginx:alpine                                              0.0s
+ => CACHED [frontend builder  2/12] WORKDIR /app                                                                   0.0s
+ => CACHED [frontend builder  3/12] COPY package*.json ./                                                          0.0s
+ => CACHED [frontend builder  4/12] RUN npm ci                                                                     0.0s
+ => CACHED [frontend builder  5/12] COPY client/ ./client/                                                         0.0s
+ => CACHED [frontend builder  6/12] COPY shared/ ./shared/                                                         0.0s
+ => CACHED [frontend builder  7/12] COPY vite.config.ts ./                                                         0.0s
+ => CACHED [frontend builder  8/12] COPY tailwind.config.ts ./                                                     0.0s
+ => CACHED [frontend builder  9/12] COPY postcss.config.js ./                                                      0.0s
+ => CACHED [frontend builder 10/12] COPY tsconfig.json ./                                                          0.0s
+ => CACHED [frontend builder 11/12] COPY components.json ./                                                        0.0s
+ => ERROR [frontend builder 12/12] RUN npm run build                                                              12.1s
+------
+ > [frontend builder 12/12] RUN npm run build:
+0.440
+0.440 > rest-express@1.0.0 build
+0.440 > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+0.440
+0.791 vite v5.4.14 building for production...
+0.867 transforming...
+1.523 Browserslist: browsers data (caniuse-lite) is 8 months old. Please run:
+1.523   npx update-browserslist-db@latest
+1.523   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+11.31 ✓ 1727 modules transformed.
+11.84 rendering chunks...
+11.85 computing gzip size...
+11.87 ../dist/public/index.html                   0.63 kB │ gzip:   0.38 kB
+11.87 ../dist/public/assets/index-BpyfWkhI.css   61.21 kB │ gzip:  10.92 kB
+11.87 ../dist/public/assets/index-_LN41dEA.js   363.21 kB │ gzip: 114.34 kB
+11.87 ✓ built in 11.04s
+11.94 ✘ [ERROR] The entry point "server/index.ts" cannot be marked as external
+11.94
+11.94 1 error
+------
+failed to solve: process "/bin/sh -c npm run build" did not complete successfully: exit code: 1
+⏳ Waiting for all services to be ready...
+WARN[0000] /root/jjkl/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion
+✅ Deployment successful!
+
+🌐 Frontend: http://localhost
+🔧 Backend API: http://localhost:5000
+🗄️  PostgreSQL: localhost:5432
+
+📋 Service status:
+WARN[0000] /root/jjkl/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion
+NAME               IMAGE                COMMAND                  SERVICE    CREATED          STATUS                    PORTS
+deeplom-backend    jjkl-backend         "docker-entrypoint.s…"   backend    46 seconds ago   Up 38 seconds             0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp
+deeplom-postgres   postgres:15-alpine   "docker-entrypoint.s…"   postgres   49 seconds ago   Up 49 seconds (healthy)   0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp
+
+📝 Useful commands:
+   View logs:     docker-compose logs -f [service]
+   Stop all:      docker-compose down
+   Restart:       docker-compose restart [service]
+   Database CLI:  docker-compose exec postgres psql -U deeplom_user -d deeplom
+
+🧪 Run tests with: ./test-deployment.sh
