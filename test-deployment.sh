@@ -6,12 +6,12 @@ echo "================================="
 
 # Test if containers are running
 echo "📋 Checking container status..."
-if docker-compose ps | grep -q "Up"; then
+if docker compose ps | grep -q "Up"; then
     echo "✅ All containers are running"
-    docker-compose ps
+    docker compose ps
 else
     echo "❌ Some containers are not running"
-    docker-compose ps
+    docker compose ps
     exit 1
 fi
 
