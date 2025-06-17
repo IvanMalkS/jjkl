@@ -5,20 +5,26 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
+COPY drizzle.config.ts ./
 
 # Install dependencies
 RUN npm ci --only=production
+
+# Install tsx, drizzle-kit and postgresql-client globally
+RUN npm install -g tsx drizzle-kit
+RUN apk add --no-cache postgresql-client
 
 # Copy server source
 COPY server/ ./server/
 COPY shared/ ./shared/
 COPY tsconfig.json ./
 
-# Install tsx for running TypeScript
-RUN npm install -g tsx
-
 EXPOSE 5000
 
 ENV NODE_ENV=production
 
-CMD ["tsx", "server/production.ts"]
+# Create startup script
+COPY docker-entrypoint.sh ./
+RUN chmod +x docker-entrypoint.sh
+
+CMD ["./docker-entrypoint.sh"]

@@ -1,17 +1,25 @@
 version: '3.8'
 
 services:
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.client
-    container_name: deeplom-frontend
+  postgres:
+    image: postgres:15-alpine
+    container_name: deeplom-postgres
+    environment:
+      POSTGRES_DB: deeplom
+      POSTGRES_USER: deeplom_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-deeplom_password_2024}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     ports:
-      - "80:80"
-    depends_on:
-      - backend
+      - "5432:5432"
     networks:
       - deeplom-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U deeplom_user -d deeplom"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     build:
@@ -23,9 +31,30 @@ services:
     environment:
       - NODE_ENV=production
       - JWT_SECRET=${JWT_SECRET:-your-secret-key-change-in-production}
+      - DATABASE_URL=postgresql://deeplom_user:${POSTGRES_PASSWORD:-deeplom_password_2024}@postgres:5432/deeplom
+      - FRONTEND_URL=http://localhost
+    depends_on:
+      postgres:
+        condition: service_healthy
     networks:
       - deeplom-network
     restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    container_name: deeplom-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - deeplom-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
 
 networks:
   deeplom-network:

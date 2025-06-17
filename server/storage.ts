@@ -1,4 +1,6 @@
 import { users, workOrders, chatMessages, type User, type InsertUser, type WorkOrder, type InsertWorkOrder, type ChatMessage, type InsertChatMessage } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import bcrypt from 'bcrypt';
 
 export interface IStorage {
@@ -19,6 +21,94 @@ export interface IStorage {
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
 }
 
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user || undefined;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const hashedPassword = await bcrypt.hash(insertUser.password, 10);
+    const [user] = await db
+      .insert(users)
+      .values({
+        name: insertUser.name,
+        email: insertUser.email,
+        password: hashedPassword,
+      })
+      .returning();
+    return user;
+  }
+
+  async verifyPassword(email: string, password: string): Promise<User | null> {
+    const user = await this.getUserByEmail(email);
+    if (!user) return null;
+
+    const isValid = await bcrypt.compare(password, user.password);
+    return isValid ? user : null;
+  }
+
+  async createWorkOrder(order: InsertWorkOrder & { userId: number; price: number }): Promise<WorkOrder> {
+    const [workOrder] = await db
+      .insert(workOrders)
+      .values({
+        type: order.type,
+        theme: order.theme,
+        customOutline: order.customOutline ?? false,
+        outline: order.outline || null,
+        userId: order.userId,
+        price: order.price,
+        status: 'pending',
+      })
+      .returning();
+    return workOrder;
+  }
+
+  async getWorkOrdersByUserId(userId: number): Promise<WorkOrder[]> {
+    return await db
+      .select()
+      .from(workOrders)
+      .where(eq(workOrders.userId, userId))
+      .orderBy(workOrders.createdAt);
+  }
+
+  async getWorkOrderById(id: number): Promise<WorkOrder | undefined> {
+    const [order] = await db.select().from(workOrders).where(eq(workOrders.id, id));
+    return order || undefined;
+  }
+
+  async updateWorkOrderStatus(id: number, status: string): Promise<void> {
+    await db
+      .update(workOrders)
+      .set({ 
+        status,
+        completedAt: status === 'completed' ? new Date() : null
+      })
+      .where(eq(workOrders.id, id));
+  }
+
+  async getChatMessagesByOrderId(orderId: number): Promise<ChatMessage[]> {
+    return await db
+      .select()
+      .from(chatMessages)
+      .where(eq(chatMessages.orderId, orderId))
+      .orderBy(chatMessages.createdAt);
+  }
+
+  async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
+    const [chatMessage] = await db
+      .insert(chatMessages)
+      .values(message)
+      .returning();
+    return chatMessage;
+  }
+}
+
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private workOrders: Map<number, WorkOrder>;
@@ -34,64 +124,6 @@ export class MemStorage implements IStorage {
     this.currentUserId = 1;
     this.currentWorkOrderId = 1;
     this.currentChatMessageId = 1;
-
-    // Add some mock data
-    this.seedData();
-  }
-
-  private async seedData() {
-    // Create a test user
-    const testUser = await this.createUser({
-      name: 'Иван Петров',
-      email: 'test@example.com',
-      password: 'password123'
-    });
-
-    // Create some mock work orders
-    const mockOrders = [
-      {
-        userId: testUser.id,
-        type: 'bachelor',
-        theme: 'Применение нейросетей в образовании',
-        status: 'completed',
-        customOutline: false,
-        outline: null,
-        price: 899,
-        completedAt: new Date()
-      },
-      {
-        userId: testUser.id,
-        type: 'coursework',
-        theme: 'Анализ данных с помощью машинного обучения',
-        status: 'in_progress',
-        customOutline: false,
-        outline: null,
-        price: 759,
-        completedAt: null
-      }
-    ];
-
-    for (const order of mockOrders) {
-      const workOrder: WorkOrder = {
-        id: this.currentWorkOrderId++,
-        ...order,
-        createdAt: new Date()
-      };
-      this.workOrders.set(workOrder.id, workOrder);
-    }
-
-    // Add some mock chat messages
-    this.createChatMessage({
-      orderId: 2,
-      fromUser: true,
-      message: 'Здравствуйте! Когда будет готова моя работа?'
-    });
-
-    this.createChatMessage({
-      orderId: 2,
-      fromUser: false,
-      message: 'Добрый день! Ваша работа будет готова в течение 2-3 часов.'
-    });
   }
 
   async getUser(id: number): Promise<User | undefined> {
@@ -177,4 +209,7 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Use database storage in production, memory storage in development
+export const storage = process.env.NODE_ENV === 'production' 
+  ? new DatabaseStorage() 
+  : new MemStorage();
