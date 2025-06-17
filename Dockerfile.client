@@ -7,24 +7,24 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
-# Copy client source
+# Copy source files
 COPY client/ ./client/
+COPY server/ ./server/
 COPY shared/ ./shared/
 COPY vite.config.ts ./
 COPY tailwind.config.ts ./
 COPY postcss.config.js ./
 COPY tsconfig.json ./
 COPY components.json ./
-COPY build.sh ./
 
-# Build the client with custom script
-RUN chmod +x build.sh && ./build.sh
+# Build frontend only (backend build not needed for frontend container)
+RUN npx vite build
 
 # Production stage
 FROM nginx:alpine
 
 # Copy built files
-COPY --from=builder /app/dist /usr/share/nginx/html
+COPY --from=builder /app/dist/public /usr/share/nginx/html
 
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/nginx.conf

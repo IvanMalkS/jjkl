@@ -1,0 +1,81 @@
+root@nonstop-rest:~/jjkl# ./deploy.sh
+🚀 Deeplom Bot Deployment Script
+================================
+🔐 Generated JWT secret
+🔐 Using default PostgreSQL password
+🛑 Stopping existing containers...
+🗑️  Remove existing database data? (y/N): y
+🗑️  Database volume removed
+🏗️  Building Docker containers...
+📦 Building backend container...
+Compose can now delegate builds to bake for better performance.
+ To do so, set COMPOSE_BAKE=true.
+[+] Building 0.0s (0/1)                                                                                                                                                                           docker:default
+[+] Building 1.1s (18/18) FINISHED                                                                                                                                                                docker:default
+ => [backend internal] load build definition from Dockerfile.server                                                                                                                                         0.0s
+ => => transferring dockerfile: 606B                                                                                                                                                                        0.0s
+ => [backend internal] load metadata for docker.io/library/node:20-alpine                                                                                                                                   0.7s
+ => [backend internal] load .dockerignore                                                                                                                                                                   0.0s
+ => => transferring context: 159B                                                                                                                                                                           0.0s
+ => [backend  1/12] FROM docker.io/library/node:20-alpine@sha256:d3507a213936fe4ef54760a186e113db5188472d9efdf491686bd94580a1c1e8                                                                           0.0s
+ => [backend internal] load build context                                                                                                                                                                   0.0s
+ => => transferring context: 21.18kB                                                                                                                                                                        0.0s
+ => CACHED [backend  2/12] WORKDIR /app                                                                                                                                                                     0.0s
+ => CACHED [backend  3/12] COPY package*.json ./                                                                                                                                                            0.0s
+ => CACHED [backend  4/12] COPY drizzle.config.ts ./                                                                                                                                                        0.0s
+ => CACHED [backend  5/12] RUN npm ci --only=production                                                                                                                                                     0.0s
+ => CACHED [backend  6/12] RUN npm install -g tsx drizzle-kit                                                                                                                                               0.0s
+ => CACHED [backend  7/12] RUN apk add --no-cache postgresql-client                                                                                                                                         0.0s
+ => CACHED [backend  8/12] COPY server/ ./server/                                                                                                                                                           0.0s
+ => CACHED [backend  9/12] COPY shared/ ./shared/                                                                                                                                                           0.0s
+ => CACHED [backend 10/12] COPY tsconfig.json ./                                                                                                                                                            0.0s
+ => CACHED [backend 11/12] COPY docker-entrypoint.sh ./                                                                                                                                                     0.0s
+ => CACHED [backend 12/12] RUN chmod +x docker-entrypoint.sh                                                                                                                                                0.0s
+ => [backend] exporting to image                                                                                                                                                                            0.0s
+ => => exporting layers                                                                                                                                                                                     0.0s
+ => => writing image sha256:674182fc2b038812666f4b571d7de5aeaa65c9bd6c24ec57ce0de737b371b1d8                                                                                                                0.0s
+ => => naming to docker.io/library/jjkl-backend                                                                                                                                                             0.0s
+ => [backend] resolving provenance for metadata file                                                                                                                                                        0.0s
+[+] Building 1/1
+ ✔ backend  Built                                                                                                                                                                                           0.0s
+📦 Building frontend container...
+Compose can now delegate builds to bake for better performance.
+ To do so, set COMPOSE_BAKE=true.
+[+] Building 1.0s (19/21)                                                                                                                                                                         docker:default
+ => [frontend internal] load build definition from Dockerfile.client                                                                                                                                        0.0s
+ => => transferring dockerfile: 672B                                                                                                                                                                        0.0s
+ => [frontend internal] load metadata for docker.io/library/nginx:alpine                                                                                                                                    0.0s
+ => [frontend internal] load metadata for docker.io/library/node:20-alpine                                                                                                                                  0.2s
+ => [frontend internal] load .dockerignore                                                                                                                                                                  0.0s
+ => => transferring context: 159B                                                                                                                                                                           0.0s
+ => [frontend builder  1/13] FROM docker.io/library/node:20-alpine@sha256:d3507a213936fe4ef54760a186e113db5188472d9efdf491686bd94580a1c1e8                                                                  0.0s
+ => [frontend internal] load build context                                                                                                                                                                  0.1s
+ => => transferring context: 210.35kB                                                                                                                                                                       0.0s
+ => CACHED [frontend stage-1 1/3] FROM docker.io/library/nginx:alpine                                                                                                                                       0.0s
+ => CACHED [frontend builder  2/13] WORKDIR /app                                                                                                                                                            0.0s
+ => CACHED [frontend builder  3/13] COPY package*.json ./                                                                                                                                                   0.0s
+ => CACHED [frontend builder  4/13] RUN npm ci                                                                                                                                                              0.0s
+ => CACHED [frontend builder  5/13] COPY client/ ./client/                                                                                                                                                  0.0s
+ => CACHED [frontend builder  6/13] COPY shared/ ./shared/                                                                                                                                                  0.0s
+ => CACHED [frontend builder  7/13] COPY vite.config.ts ./                                                                                                                                                  0.0s
+ => CACHED [frontend builder  8/13] COPY tailwind.config.ts ./                                                                                                                                              0.0s
+ => CACHED [frontend builder  9/13] COPY postcss.config.js ./                                                                                                                                               0.0s
+ => CACHED [frontend builder 10/13] COPY tsconfig.json ./                                                                                                                                                   0.0s
+ => CACHED [frontend builder 11/13] COPY components.json ./                                                                                                                                                 0.0s
+ => [frontend builder 12/13] COPY build.sh ./                                                                                                                                                               0.1s
+ => ERROR [frontend builder 13/13] RUN chmod +x build.sh && ./build.sh                                                                                                                                      0.4s
+------
+ > [frontend builder 13/13] RUN chmod +x build.sh && ./build.sh:
+0.327 /bin/sh: ./build.sh: not found
+------
+failed to solve: process "/bin/sh -c chmod +x build.sh && ./build.sh" did not complete successfully: exit code: 127
+🗄️  Starting PostgreSQL database...
+[+] Running 2/2
+ ✔ Network jjkl_deeplom-network  Created                                                                                                                                                                    0.1s
+ ✔ Container deeplom-postgres    Started                                                                                                                                                                    0.4s
+⏳ Waiting for PostgreSQL to be ready...
+✅ PostgreSQL is ready!
+🔧 Starting backend service...
+[+] Running 1/2
+ ⠧ Container deeplom-postgres  Waiting                                                                                                                                                                      7.8s
+ ✔ Container deeplom-backend   Created                                                                                                                                                                      0.1s

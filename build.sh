@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Custom build script to fix esbuild configuration issue
 echo "🏗️  Building frontend with Vite..."
