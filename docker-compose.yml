@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    container_name: deeplom-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - deeplom-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    container_name: deeplom-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET:-your-secret-key-change-in-production}
+    networks:
+      - deeplom-network
+    restart: unless-stopped
+
+networks:
+  deeplom-network:
+    driver: bridge
